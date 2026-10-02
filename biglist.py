@@ -1,4 +1,8 @@
 def format_desmos_list(var_name: str, plain_list: Sequence, max_mega_fragments: int | None = None, max_fragments: int | None = None, max_list_size: int = 10000) -> str:
+    if (max_mega_fragments is not None and max_mega_fragments < 1): max_mega_fragments = None
+    if (max_fragments is not None and max_fragments < 1): max_fragments = None
+    elif (max_fragments is not None):
+        max_fragments = min(1024, max_fragments)
     output = ''
 
     current_matrix_position = 0
@@ -20,7 +24,7 @@ def format_desmos_list(var_name: str, plain_list: Sequence, max_mega_fragments: 
 
     for i in range(0, len(plain_list), max_list_size):
         if (current_matrix_position == 0 == current_mega_fragments):
-           current_global_fragments += 1
+            current_global_fragments += 1
         if (current_mega_fragments == 0):
             current_mega_fragments += 1
             output += rf'{get_sanitized_string(f'{var_name}{current_global_fragments}')}\left(k\right)=\left\{{'
@@ -29,16 +33,19 @@ def format_desmos_list(var_name: str, plain_list: Sequence, max_mega_fragments: 
                 output += ','
             total_num_fragments = current_mega_fragments if max_mega_fragments is None else (current_global_fragments - 1) * max_mega_fragments + current_mega_fragments
             output += rf'{min(1 + (total_num_fragments - 1) * 1024 * max_list_size, len(plain_list))}\le k \le{min((total_num_fragments) * 1024 * max_list_size, len(plain_list))}:\begin{{bmatrix}}'
+        output += rf'\left[{','.join(map(str, plain_list[i:i+max_list_size]))}\right]'
         current_matrix_position += 1
-        output += rf'\left[{','.join(map(str, plain_list[i:i+max_list_size]))}\right]{getTrailingCharacter()}'
         if (i+max_list_size >= len(plain_list)):
-            current_matrix_position += 1
+            output += r'.\operatorname{join}\left(\operatorname{repeat}\left(0,k\right)\right)'.replace("k", str(i+max_list_size - len(plain_list)))
             break
-        if (current_matrix_position < 1024 and (max_fragments is None or current_matrix_position < max_fragments)): continue
+        if (current_matrix_position < 1024 and (max_fragments is None or current_matrix_position < max_fragments)):
+            output += getTrailingCharacter()
+            continue
         close_matrix()
         current_matrix_position = 0
         current_mega_fragments += 1
         if (max_mega_fragments is None or current_mega_fragments < max_mega_fragments): continue
+        current_mega_fragments = 0
         output += r'\right\}''\n'
 
     close_matrix()
@@ -48,12 +55,12 @@ def format_desmos_list(var_name: str, plain_list: Sequence, max_mega_fragments: 
     output += f'{get_sanitized_string(var_name)}\\left(l\\right)='
 
     if max_mega_fragments is not None and current_global_fragments > 1:
-        output += '\\left{'
+        output += '\\left\\{'
         for i in range(current_global_fragments):
             if i > 0:
                 output += ','
-            output += f'{min(1 + i * 10240000 * max_mega_fragments, len(plain_list))} \\le k \\le {min((1 + i) * 10240000 * max_mega_fragments, len(plain_list))}:{get_sanitized_string(f'{var_name}{i+1}')}\\left(k\\right)'
-        output += '\\right}'
+            output += f'{min(1 + i * max_list_size * (max_fragments if max_fragments is not None else 1024) * max_mega_fragments, len(plain_list))} \\le k \\le {min((1 + i) * max_list_size * (max_fragments if max_fragments is not None else 1024) * max_mega_fragments, len(plain_list))}:{get_sanitized_string(f'{var_name}{i+1}')}\\left(k\\right)'
+        output += '\\right\\}'
     else:
         output += f'{get_sanitized_string(f'{var_name}1')}\\left(k\\right)'
     output += r'\operatorname{for}k=l'
