@@ -1,3 +1,8 @@
+from collections.abc import Sequence
+
+def get_sanitized_string(string: str) -> str:
+    return f'{string[0]}_{{{string[1:]}}}'
+
 def format_desmos_list(var_name: str, plain_list: Sequence, max_mega_fragments: int | None = None, max_fragments: int | None = None, max_list_size: int = 10000) -> str:
     if (max_mega_fragments is not None and max_mega_fragments < 1): max_mega_fragments = None
     if (max_fragments is not None and max_fragments < 1): max_fragments = None
