@@ -4,7 +4,7 @@ Turn matrix-based data storage into an easy to use view equivalent to accessing 
 ## Usage
 Use `biglist.py` as described in any Python project.
 - `var_name` simply describes the variable name expected. It automatically handles formatting for you, so there is no need to add underscores manually.
-- `plain_list` is the list you want to pass in. It can either be a flat list of numbers or a tuple containing three aligned lists.
+- `plain_list` is the list (or Sequence) you want to pass in.
 - `max_mega_fragments` represents the maximum number of packed matrices in a single line. For most tasks you will never need to worry about this since usually only one partially-filled mega fragment is needed, but this provides an additional lever if you need each line to be reasonably-sized.
 - `max_fragments` represents the maximum number of regular-sized lists in a single matrix element. Usually for smaller BigLists you won't need to fiddle around with it, but you may need to specify a smaller number less than 1024 if you end up getting OOM when inserting the string into Desmos or if DevTools flat-out stops working when pasting the list in.
 - `max_list_size` just represents the maximum number of elements a standard Desmos list can hold. Currently 10,000, but maybe Desmos Team will increase this.
